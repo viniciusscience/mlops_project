@@ -4,3 +4,5 @@ data/preprocessed/*
 artifacts/*
 models/*
 metrics/*
+mlruns/*
+.env

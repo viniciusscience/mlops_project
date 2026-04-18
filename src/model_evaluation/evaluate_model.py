@@ -1,7 +1,7 @@
 import logging
 import json
 import os
-
+import mlflow
 import joblib
 import numpy as np
 import pandas as pd
@@ -62,20 +62,34 @@ def evaluate_model(
         X (pd.DataFrame): Test features.
         y_true (pd.Series): True labels.
     """
-    # Generate model predictions
-    y_pred_proba = model.predict(X)
-    y_pred = np.argmax(y_pred_proba, axis=1)
 
-    # Calculate evaluation metrics
-    report = classification_report(y_true, y_pred, output_dict=True)
-    cm = confusion_matrix(y_true, y_pred).tolist()
-    evaluation = {"classification_report": report, "confusion_matrix": cm}
+    mlflow.set_experiment("ml_classification")
+    runs = mlflow.search_runs(
+        experiment_ids=[mlflow.get_experiment_by_name("ml_classification").experiment_id
+                        ])
+    run_id = runs.iloc[0].run_id
 
-    # Log metrics
-    logger.info(f"Classification Report:\n{classification_report(y_true, y_pred)}")
-    evaluation_path = "metrics/evaluation.json"
-    with open(evaluation_path, "w") as f:
-        json.dump(evaluation, f, indent=2)
+    with mlflow.start_run(run_id=run_id):
+        # Generate model predictions
+        y_pred_proba = model.predict(X)
+        y_pred = np.argmax(y_pred_proba, axis=1)
+
+        # Calculate evaluation metrics
+        report = classification_report(y_true, y_pred, output_dict=True)
+        cm = confusion_matrix(y_true, y_pred).tolist()
+        evaluation = {"classification_report": report, "confusion_matrix": cm}
+
+        # Log metrics
+        logger.info(f"Classification Report:\n{classification_report(y_true, y_pred)}")
+        evaluation_path = "metrics/evaluation.json"
+        with open(evaluation_path, "w") as f:
+            json.dump(evaluation, f, indent=2)
+        mlflow.log_metrics({
+            "accuracy": report["accuracy"],
+            "precision": report["weighted avg"]["precision"],
+            "recall": report["weighted avg"]["recall"],
+            "f1_score": report["weighted avg"]["f1-score"],
+        })
 
 
 def main() -> None:
