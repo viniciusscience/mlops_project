@@ -1,0 +1,6 @@
+ml_classifier.egg-info
+data/raw/raw.csv
+data/preprocessed/*
+artifacts/*
+models/*
+metrics/*

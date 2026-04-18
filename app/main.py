@@ -3,10 +3,11 @@ import logging
 import os
 
 import joblib
+os.environ.setdefault("KERAS_BACKEND", "jax")
 import pandas as pd
 from flask import Flask, render_template, request
 from sklearn.datasets import load_breast_cancer
-from tensorflow.keras.models import load_model
+from keras.models import load_model
 
 logger = logging.getLogger("app.main")
 
@@ -118,7 +119,7 @@ def create_routes(app: Flask) -> None:
 app = Flask(__name__)
 app.model_service = ModelService()
 create_routes(app)
-logger.info("Application initialized with model service and routes")
+logger.info("Application qini tialized with model service and routes")
 
 
 def main() -> None:

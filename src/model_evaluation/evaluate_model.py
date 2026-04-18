@@ -1,24 +1,26 @@
 import logging
 import json
+import os
 
 import joblib
 import numpy as np
 import pandas as pd
-import tensorflow as tf
+os.environ.setdefault("KERAS_BACKEND", "jax")
+import keras
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.preprocessing import LabelEncoder
 
 logger = logging.getLogger("src.model_evaluation.evaluate_model")
 
 
-def load_model() -> tf.keras.Model:
+def load_model() -> keras.Model:
     """Load the trained Keras model from disk.
 
     Returns:
-        tf.keras.Model: Loaded Keras model.
+        keras.Model: Loaded Keras model.
     """
     model_path = "models/model.keras"
-    model = tf.keras.models.load_model(model_path)
+    model = keras.models.load_model(model_path)
     return model
 
 
@@ -50,12 +52,12 @@ def load_test_data() -> tuple[pd.DataFrame, pd.Series]:
 
 
 def evaluate_model(
-    model: tf.keras.Model, encoder: LabelEncoder, X: pd.DataFrame, y_true: pd.Series
+    model: keras.Model, encoder: LabelEncoder, X: pd.DataFrame, y_true: pd.Series
 ) -> None:
     """Evaluate the model and generate performance metrics.
 
     Args:
-        model (tf.keras.Model): Trained Keras model.
+        model (keras.Model): Trained Keras model.
         encoder (LabelEncoder): Fitted label encoder.
         X (pd.DataFrame): Test features.
         y_true (pd.Series): True labels.

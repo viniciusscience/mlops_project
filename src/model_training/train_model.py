@@ -3,15 +3,17 @@ import logging
 import os
 
 import joblib
+# Use JAX backend because numpy backend does not implement model.fit.
+os.environ.setdefault("KERAS_BACKEND", "jax")
+import keras
 import numpy as np
 import pandas as pd
-import tensorflow as tf
 import yaml
 from sklearn.preprocessing import OneHotEncoder
-from tensorflow.keras.callbacks import EarlyStopping
-from tensorflow.keras.layers import Dense, Dropout
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.optimizers import Adam
+from keras.callbacks import EarlyStopping
+from keras.layers import Dense, Dropout
+from keras.models import Sequential
+from keras.optimizers import Adam
 
 logger = logging.getLogger("src.model_training.train_model")
 
@@ -65,7 +67,7 @@ def prepare_data(train_data: pd.DataFrame) -> tuple[pd.DataFrame, np.ndarray, On
 
 def create_model(
     input_shape: int, num_classes: int, params: dict[str, int | float]
-) -> tf.keras.Model:
+) -> keras.Model:
     """Create a Keras Dense Neural Network model.
 
     Args:
@@ -74,7 +76,7 @@ def create_model(
         params (dict[str, int | float]): Model hyperparameters.
 
     Returns:
-        tf.keras.Model: Compiled Keras model.
+        keras.Model: Compiled Keras model.
     """
     model = Sequential(
         [
@@ -102,11 +104,11 @@ def create_model(
     return model
 
 
-def save_training_artifacts(model: tf.keras.Model, encoder: OneHotEncoder) -> None:
+def save_training_artifacts(model: keras.Model, encoder: OneHotEncoder) -> None:
     """Save model artifacts to disk.
 
     Args:
-        model (tf.keras.Model): Trained Keras model.
+        model (keras.Model): Trained Keras model.
         encoder (OneHotEncoder): Fitted label encoder.
     """
     artifacts_dir = "artifacts"
@@ -130,7 +132,7 @@ def train_model(train_data: pd.DataFrame, params: dict[str, int | float]) -> Non
         train_data (pd.DataFrame): Training dataset.
         params (dict[str, int | float]): Model hyperparameters.
     """
-    tf.keras.utils.set_random_seed(params.pop("random_seed"))
+    keras.utils.set_random_seed(params.pop("random_seed"))
     
     # Prepare the data
     X_train, y_train, encoder = prepare_data(train_data)
